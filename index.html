@@ -91,8 +91,10 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
 .links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.86rem}
 .btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:500;font-size:.85rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;font-family:inherit}
 .btn.primary{background:var(--green);border-color:var(--green);color:var(--surface)}
-.star{font-size:1.1rem;line-height:1;padding:4px 10px}
-.star[aria-pressed=true]{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.stars{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none;align-self:flex-start}
+.stars button{font:inherit;font-size:1.05rem;line-height:1;border:0;background:var(--surface);color:var(--muted);padding:6px 7px;cursor:pointer}
+.stars button.on{color:var(--amber);background:var(--amber-soft)}
+.stars button:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
 .more{align-self:center}
 
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
@@ -121,7 +123,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   <header>
     <span class="board">TO LET</span>
     <h1>Indiranagar Rental Shortlist</h1>
-    <p class="lead" id="lead">Every 1BHK and 2BHK up to ₹31k all-in listed on NoBroker, Housing.com and MagicBricks around Indiranagar, JB Nagar, New Thippasandra, Kodihalli and Domlur on 20 Nov 2026. Each is ranked against your priorities: safety and walkability first, then light and air, then water.</p>
+    <p class="lead" id="lead">Every 1BHK and 2BHK up to ₹31k all-in listed on NoBroker, 99acres, Housing.com and MagicBricks around Indiranagar, JB Nagar, New Thippasandra, Kodihalli and Domlur on 20 Nov 2026. Each is ranked against your priorities: safety and walkability first, then light and air, then water.</p>
   </header>
 
   <div class="stats" id="stats"></div>
@@ -143,8 +145,17 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
         <input type="range" id="cap" min="15000" max="31000" step="500" value="30000">
       </div>
       <div class="ctl">
+        <label for="view">Show</label>
+        <select id="view">
+          <option value="all">All listings</option>
+          <option value="mine">My shortlist</option>
+          <option value="everyone">Everyone's shortlist</option>
+        </select>
+      </div>
+      <div class="ctl">
         <label for="sort">Sort by</label>
         <select id="sort">
+          <option value="prio">Shortlist priority</option>
           <option value="score">Best match</option>
           <option value="rent">Cheapest all-in</option>
           <option value="sqft">Largest</option>
@@ -173,8 +184,11 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
         <label class="chip"><input type="checkbox" id="noPhotos">No photos</label>
         <label class="chip"><input type="checkbox" id="noBusy">Busy roads</label>
         <label class="chip"><input type="checkbox" id="noAgent" checked>Broker listings</label>
-        <label class="chip"><input type="checkbox" id="starOnly">Starred only</label>
       </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Stars</span>
+      <span class="note">Tap the stars on a home to shortlist it: ★★★ must see, ★★ good option, ★ backup. Tap the same star again to remove it.</span>
     </div>
     <div class="ctl" id="share-ctl">
       <label for="myname">Your name, for stars</label>
@@ -230,7 +244,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   </section>
 
   <footer>
-    <p id="foot">Snapshot taken 20 Nov 2026 from the public search pages of NoBroker, Housing.com and MagicBricks, with no login. On Housing.com, 95 of the 97 listings in budget are from brokers, and many share a rough area pin, so where the location is approximate the area score uses a middle value. MagicBricks listings have no pin at all. 99acres asked for a CAPTCHA after two pages, so it isn't included. The same flat can show up on more than one site. Listings change daily, so make sure one is still live before you spend a NoBroker contact on it.</p>
+    <p id="foot">Snapshot taken 20 Nov 2026 from the public search pages of NoBroker, Housing.com and MagicBricks, with no login. On Housing.com, 95 of the 97 listings in budget are from brokers, and many share a rough area pin, so where the location is approximate the area score uses a middle value. MagicBricks listings have no pin at all. On 99acres, broker posts with no posting date, ones over a year old, or ones pinned far from their stated area are moved to the caution list. The same flat can show up on more than one site. Listings change daily, so make sure one is still live before you spend a NoBroker contact on it.</p>
   </footer>
 </div>
 
@@ -254,14 +268,21 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   function saveStars(){try{localStorage.setItem(KEY+'-stars',JSON.stringify(stars));}catch(e){}}
   function savePrefs(){try{localStorage.setItem('shortlist-v2-prefs',JSON.stringify(prefs));}catch(e){}}
 
-  // Shared stars: when the hosted copy sets window.SHARED_DB (a Firebase Realtime Database URL),
-  // stars live there as stars/<listing>/<person> = "Display name"; otherwise they stay in this browser.
+  // Stars carry a priority: 3 = must see, 2 = good option, 1 = backup.
+  // When the hosted copy sets window.SHARED_DB (a Firebase Realtime Database URL), stars live there as
+  // stars/<listing>/<person> = {n:"Display name", p:1-3}; otherwise they stay in this browser as stars[<listing>] = 1-3.
+  var PRI={3:'Must see',2:'Good option',1:'Backup'};
   var SHARED=(window.SHARED_DB||'').replace(/\/$/,''), shared={}, sharedSig='';
   var fbKey=function(s){return String(s).replace(/[.#$\[\]\/]/g,'_');};
   var myKey=function(){return me.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24);};
-  function whoStarred(id){var o=shared[fbKey(id)]; return o?Object.keys(o).map(function(k){return o[k];}):[];}
-  function starredByMe(id){return SHARED?!!(shared[fbKey(id)]&&myKey()&&shared[fbKey(id)][myKey()]):!!stars[id];}
-  function starredByAny(id){return SHARED?whoStarred(id).length>0:!!stars[id];}
+  function norm(v){if(v==null)return null; if(typeof v==='string')return {n:v,p:2}; return {n:v.n||'?',p:Math.max(1,Math.min(3,+v.p||2))};}
+  function people(id){
+    if(!SHARED){var p=+stars[id]||0; return p?[{n:'You',p:p,mine:true}]:[];}
+    var o=shared[fbKey(id)]||{};
+    return Object.keys(o).map(function(key){var e=norm(o[key]); if(e)e.mine=(key===myKey()); return e;}).filter(Boolean).sort(function(a,b){return (b.mine-a.mine)||(b.p-a.p);});
+  }
+  function myPri(id){if(!SHARED)return +stars[id]||0; var o=shared[fbKey(id)], e=o&&myKey()?norm(o[myKey()]):null; return e?e.p:0;}
+  function sumPri(id){return people(id).reduce(function(s,e){return s+e.p;},0);}
   function pullShared(){
     if(!SHARED)return Promise.resolve();
     return fetch(SHARED+'/stars.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){
@@ -269,13 +290,15 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       $('share-note').textContent='Stars are shared with everyone who opens this link.';
     }).catch(function(){ $('share-note').textContent='Couldn\'t reach the shared stars just now. Your next star will try again.'; });
   }
-  function toggleShared(id){
+  function setPri(id,p){
+    if(myPri(id)===p)p=0;
+    if(!SHARED){ if(p)stars[id]=p; else delete stars[id]; saveStars(); render(); return; }
     if(!myKey()){ $('share-note').textContent='Type your name first, so friends can see who starred what.'; $('myname').focus(); return; }
-    var k=fbKey(id), on=starredByMe(id), url=SHARED+'/stars/'+encodeURIComponent(k)+'/'+encodeURIComponent(myKey())+'.json';
-    if(on){ if(shared[k]){delete shared[k][myKey()]; if(!Object.keys(shared[k]).length)delete shared[k];} }
-    else { shared[k]=shared[k]||{}; shared[k][myKey()]=me.trim(); }
+    var kk=fbKey(id), url=SHARED+'/stars/'+encodeURIComponent(kk)+'/'+encodeURIComponent(myKey())+'.json', val={n:me.trim(),p:p};
+    if(!p){ if(shared[kk]){delete shared[kk][myKey()]; if(!Object.keys(shared[kk]).length)delete shared[kk];} }
+    else { shared[kk]=shared[kk]||{}; shared[kk][myKey()]=val; }
     sharedSig=''; render();
-    fetch(url,{method:on?'DELETE':'PUT',headers:{'Content-Type':'application/json'},body:on?undefined:JSON.stringify(me.trim())})
+    fetch(url,{method:p?'PUT':'DELETE',headers:{'Content-Type':'application/json'},body:p?JSON.stringify(val):undefined})
       .then(function(r){if(!r.ok)throw new Error(r.status);}).catch(function(){ $('share-note').textContent='That star didn\'t save. Check your connection and try again.'; }).then(pullShared);
   }
   var $=function(id){return document.getElementById(id);};
@@ -288,15 +311,15 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   AREAS.forEach(function(a){var l=document.createElement('label');l.className='chip';l.innerHTML='<input type="checkbox" id="area-'+a[0]+'" value="'+a[0]+'" checked>'+esc(a[1]);areaBox.appendChild(l);});
 
   function restore(){
-    if(prefs.who)$('who').value=prefs.who; if(prefs.cap)$('cap').value=prefs.cap; if(prefs.sort)$('sort').value=prefs.sort;
+    if(prefs.who)$('who').value=prefs.who; if(prefs.cap)$('cap').value=prefs.cap; if(prefs.sort)$('sort').value=prefs.sort; if(prefs.view)$('view').value=prefs.view;
     if(prefs.bhk!=null){bhk=prefs.bhk;}
-    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){if(prefs[id]!=null)$(id).checked=prefs[id];});
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent'].forEach(function(id){if(prefs[id]!=null)$(id).checked=prefs[id];});
     if(prefs.areas)AREAS.forEach(function(a){$('area-'+a[0]).checked=prefs.areas.indexOf(a[0])>=0;});
     document.querySelectorAll('#bhk button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===bhk));});
   }
   function readPrefs(){
-    prefs={who:$('who').value,cap:+$('cap').value,sort:$('sort').value,bhk:bhk,areas:AREAS.filter(function(a){return $('area-'+a[0]).checked;}).map(function(a){return a[0];})};
-    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){prefs[id]=$(id).checked;});
+    prefs={who:$('who').value,cap:+$('cap').value,sort:$('sort').value,view:$('view').value,bhk:bhk,areas:AREAS.filter(function(a){return $('area-'+a[0]).checked;}).map(function(a){return a[0];})};
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent'].forEach(function(id){prefs[id]=$(id).checked;});
     savePrefs();
   }
 
@@ -310,19 +333,29 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     if(p.noWaterUnknown&&!x.water)return false;
     if(p.noPhotos&&!x.photos)return false;
     if(p.noBusy&&x.flags.some(function(f){return /busy road|main road/.test(f);}))return false;
-    if(p.starOnly&&!starredByAny(x.id))return false;
     if(p.noAgent&&x.postedBy==='Agent')return false;
     return true;
   }
-  function sorter(s){
+  function sorter(s,view){
+    if(s==='prio'&&view==='everyone')return function(a,b){return (sumPri(b.id)-sumPri(a.id))||(myPri(b.id)-myPri(a.id))||((b.score||0)-(a.score||0));};
+    if(s==='prio')return function(a,b){return (myPri(b.id)-myPri(a.id))||(sumPri(b.id)-sumPri(a.id))||((b.score||0)-(a.score||0));};
     if(s==='rent')return function(a,b){return a.allin-b.allin||b.score-a.score;};
     if(s==='sqft')return function(a,b){return (b.sqft||0)-(a.sqft||0);};
     if(s==='metro')return function(a,b){return (a.metroKm==null?9:a.metroKm)-(b.metroKm==null?9:b.metroKm);};
     if(s==='new')return function(a,b){return (a.days==null?999:a.days)-(b.days==null?999:b.days);};
-    return function(a,b){return b.score-a.score;};
+    return function(a,b){return (b.score||0)-(a.score||0);};
   }
   function flagClass(f){if(/^owner listing|^power backup/.test(f))return 'flag ok';return /busy road|ground floor|over|borewell|deposit (7|8|9|1\d)|scam|stale|contradicts|posted 3|single room|sale text|looks wrong|not stated$/.test(f)&&!/^water not stated$|^deposit not stated$/.test(f)?'flag bad':'flag';}
 
+  function starGroup(id){
+    var mp=myPri(id);
+    return '<div class="stars" role="group" aria-label="Your priority for this home">'+[1,2,3].map(function(p){
+      return '<button type="button" class="'+(p<=mp?'on':'')+'" data-id="'+esc(id)+'" data-p="'+p+'" aria-pressed="'+(p===mp)+'" title="'+PRI[p]+'" aria-label="'+PRI[p]+'">'+(p<=mp?'★':'☆')+'</button>';}).join('')+'</div>';
+  }
+  function whoLine(id){
+    var ppl=people(id); if(!ppl.length)return '';
+    return '<div class="who">'+ppl.map(function(e){return (SHARED?esc(e.mine?'You':e.n)+' ':'')+'★★★'.slice(0,e.p)+' '+PRI[e.p].toLowerCase();}).join(' · ')+'</div>';
+  }
   function card(x,i,rankAll){
     var sub=x.sub||{}; var parts=[['loc','--s-loc'],['light','--s-light'],['water','--s-water'],['cost','--s-cost'],['qual','--s-qual'],['trust','--s-trust']];
     var bar=parts.map(function(p){return '<i style="width:'+(sub[p[0]]||0)+'%;background:var('+p[1]+')" title="'+p[0]+' '+(sub[p[0]]||0)+'"></i>';}).join('');
@@ -352,8 +385,8 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       '<div class="body">'+
         '<div class="titlerow"><div><div class="title">'+x.bhk+'BHK · '+esc(price)+'</div>'+
         '<div class="where">'+srcTag+esc(x.loc)+street+(x.society?' · '+esc(x.society):'')+esc(metro)+'</div></div>'+
-        '<button type="button" class="btn star" data-id="'+esc(x.id)+'" aria-pressed="'+starredByMe(x.id)+'" aria-label="Star this listing">'+(starredByMe(x.id)?'★':'☆')+(SHARED&&whoStarred(x.id).length?' '+whoStarred(x.id).length:'')+'</button></div>'+
-        (SHARED&&whoStarred(x.id).length?'<div class="who">★ '+esc(whoStarred(x.id).join(', '))+'</div>':'')+
+        starGroup(x.id)+'</div>'+
+        whoLine(x.id)+
         (x.score!=null?'<div class="bar" aria-hidden="true">'+bar+'</div>':'')+
         '<div class="facts">'+facts+'</div>'+
         (flags?'<div class="flags">'+flags+'</div>':'')+
@@ -363,11 +396,18 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
 
   function render(){
     readPrefs(); $('capv').textContent=rupee(prefs.cap);
-    var rows=nb.filter(passes).sort(sorter(prefs.sort));
+    var view=prefs.view||'all', rows;
+    if(view==='all'){
+      rows=nb.filter(passes).sort(sorter(prefs.sort==='prio'?'score':prefs.sort,view));
+      $('count').textContent=rows.length+' of '+nb.length+' listings match';
+    } else {
+      // Shortlists show every starred home, whatever the filters say.
+      rows=all.filter(function(x){return view==='mine'?myPri(x.id)>0:people(x.id).length>0;}).sort(sorter(prefs.sort,view));
+      $('count').textContent=rows.length+(view==='mine'?' homes on your shortlist':' homes on anyone\'s shortlist');
+    }
     var rankMap={}; nb.slice().sort(function(a,b){return b.score-a.score;}).forEach(function(x,i){rankMap[x.id]=i+1;});
-    $('count').textContent=rows.length+' of '+nb.length+' listings match';
     var list=$('list');
-    if(!rows.length){list.innerHTML='<div class="empty">Nothing matches these filters. Try raising the rent cap or showing ground-floor homes.</div>';$('more').hidden=true;return;}
+    if(!rows.length){list.innerHTML='<div class="empty">'+(view==='all'?'Nothing matches these filters. Try raising the rent cap or showing ground-floor homes.':(view==='mine'?'You haven\'t starred anything yet.':'Nobody has starred anything yet.')+' Tap ☆ on a home to shortlist it: one star for a backup, three for a must-see.')+'</div>';$('more').hidden=true;return;}
     list.innerHTML=rows.slice(0,shown).map(function(x,i){return card(x,i,rankMap[x.id]);}).join('');
     $('more').hidden=rows.length<=shown; $('more').textContent='Show '+Math.min(25,rows.length-shown)+' more';
   }
@@ -388,12 +428,16 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   }
 
   $('more').addEventListener('click',function(){shown+=25;render();});
-  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
+  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
+  $('view').addEventListener('change',function(){
+    var v=$('view').value, s=$('sort');
+    if(v!=='all'&&s.value==='score')s.value='prio';
+    if(v==='all'&&s.value==='prio')s.value='score';
+    shown=25;render();
+  });
   areaBox.addEventListener('change',function(){shown=25;render();});
   document.querySelectorAll('#bhk button').forEach(function(b){b.addEventListener('click',function(){bhk=+b.dataset.v;document.querySelectorAll('#bhk button').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});shown=25;render();});});
-  document.addEventListener('click',function(e){var b=e.target.closest('.star');if(!b)return;var id=b.dataset.id;
-    if(SHARED){toggleShared(id);return;}
-    if(stars[id])delete stars[id];else stars[id]=1;saveStars();b.setAttribute('aria-pressed',String(!!stars[id]));b.textContent=stars[id]?'★':'☆';if(prefs.starOnly)render();});
+  document.addEventListener('click',function(e){var b=e.target.closest('.stars button');if(!b)return;setPri(b.dataset.id,+b.dataset.p);});
   $('myname').value=me;
   $('myname').addEventListener('input',function(){me=$('myname').value;try{localStorage.setItem('shortlist-name',me);}catch(e){} if(SHARED)render();});
   if(!SHARED)$('myname').closest('.ctl').hidden=true;
