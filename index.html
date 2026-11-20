@@ -57,6 +57,7 @@ select,input[type=range]{font:inherit;width:100%}
 select,input[type=text]{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}
 input[type=text]{max-width:260px}
 .who{font-size:.82rem;color:var(--amber);font-weight:500}
+.prem{display:inline-block;vertical-align:2px;margin-left:4px;font-family:var(--body);font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--amber);color:var(--amber);background:var(--amber-soft)}
 input[type=range]{accent-color:var(--green)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;user-select:none}
@@ -124,7 +125,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   <header>
     <span class="board">TO LET</span>
     <h1>Indiranagar Rental Shortlist</h1>
-    <p class="lead" id="lead">Every 1BHK and 2BHK up to ₹31k all-in listed on NoBroker, 99acres, Housing.com and MagicBricks around Indiranagar, JB Nagar, New Thippasandra, Kodihalli and Domlur on 20 Nov 2026. Each is ranked against your priorities: safety and walkability first, then light and air, then water.</p>
+    <p class="lead" id="lead">Every 1BHK and 2BHK up to ₹32k all-in listed on NoBroker, 99acres, Housing.com and MagicBricks around Indiranagar, JB Nagar, New Thippasandra, Kodihalli and Domlur on 20–21 Nov 2026. Homes between ₹30k and ₹32k are marked Premier. Each is ranked against your priorities: safety and walkability first, then light and air, then water.</p>
   </header>
 
   <div class="stats" id="stats"></div>
@@ -143,7 +144,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       </div>
       <div class="ctl">
         <label for="cap">Max all-in rent: <span id="capv" class="num"></span></label>
-        <input type="range" id="cap" min="15000" max="31000" step="500" value="30000">
+        <input type="range" id="cap" min="15000" max="32000" step="500" value="32000">
       </div>
       <div class="ctl">
         <label for="view">Show</label>
@@ -185,6 +186,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
         <label class="chip"><input type="checkbox" id="noPhotos">No photos</label>
         <label class="chip"><input type="checkbox" id="noBusy">Busy roads</label>
         <label class="chip"><input type="checkbox" id="noAgent" checked>Broker listings</label>
+        <label class="chip"><input type="checkbox" id="noPremier">Premier (₹30–32k)</label>
       </div>
     </div>
     <div class="ctl">
@@ -235,7 +237,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
           <tr><td>Area + walk</td><td class="num">30</td><td>Locality: Indiranagar 24, JB Nagar 23, HAL 3rd Stage and Kodihalli 22, New Thippasandra 21, Domlur 17, Jogupalya 14. Minus 6 on 100 Ft Rd, 12th Main or Double Road, minus 2 on other main roads, minus 3 in denser older lanes (the -palya pockets, Lakshmipuram, Eshwara Layout). Plus up to 6 for walking distance to Indiranagar or Swami Vivekananda Rd metro.</td></tr>
           <tr><td>Light + air</td><td class="num">25</td><td>Floor: ground 0, first 10, second or higher 15. Facing east, north-east or north 6, other directions 3, not stated 2. A balcony adds 4.</td></tr>
           <tr><td>Water</td><td class="num">15</td><td>Cauvery and borewell 15, Cauvery only 12, borewell only 5, not stated 6.</td></tr>
-          <tr><td>Value</td><td class="num">15</td><td>All-in rent up to ₹25k 11, up to ₹27.5k 8, up to ₹30k 5. Plus 2 for a 2BHK within budget, plus 2 if it's roomy (1BHK 550+ sq ft, 2BHK 850+).</td></tr>
+          <tr><td>Value</td><td class="num">15</td><td>All-in rent up to ₹25k 11, up to ₹27.5k 8, up to ₹30k 5, Premier (₹30–32k) 3. Plus 2 for a 2BHK, plus 2 if it's roomy (1BHK 550+ sq ft, 2BHK 850+).</td></tr>
           <tr><td>Building</td><td class="num">5</td><td>Newer building (5 years or less 3, 10 years or less 2), semi- or fully furnished 1, parking 1.</td></tr>
           <tr><td>Terms + listing</td><td class="num">10</td><td>Deposit of 3 months or less 4, up to 4 months 3, up to 6 months 1. Six or more photos 3, NoBroker-verified 1, listed in the last 14 days 2.</td></tr>
         </tbody>
@@ -264,10 +266,10 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   var OK={all:null,man:['ANYONE','BACHELOR','BACHELOR_MALE'],woman:['ANYONE','BACHELOR','BACHELOR_FEMALE'],family:['ANYONE','FAMILY'],company:['ANYONE','COMPANY']};
   var KEY='shortlist-v1', stars={}, prefs={}, me='';
   try{stars=JSON.parse(localStorage.getItem(KEY+'-stars')||'{}')||{};}catch(e){}
-  try{prefs=JSON.parse(localStorage.getItem('shortlist-v2-prefs')||'{}')||{};}catch(e){}
+  try{prefs=JSON.parse(localStorage.getItem('shortlist-v3-prefs')||'{}')||{};}catch(e){}
   try{me=localStorage.getItem('shortlist-name')||'';}catch(e){}
   function saveStars(){try{localStorage.setItem(KEY+'-stars',JSON.stringify(stars));}catch(e){}}
-  function savePrefs(){try{localStorage.setItem('shortlist-v2-prefs',JSON.stringify(prefs));}catch(e){}}
+  function savePrefs(){try{localStorage.setItem('shortlist-v3-prefs',JSON.stringify(prefs));}catch(e){}}
 
   // Stars carry a priority: 3 = must see, 2 = good option, 1 = backup.
   // When the hosted copy sets window.SHARED_DB (a Firebase Realtime Database URL), stars live there as
@@ -314,13 +316,13 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   function restore(){
     if(prefs.who)$('who').value=prefs.who; if(prefs.cap)$('cap').value=prefs.cap; if(prefs.sort)$('sort').value=prefs.sort; if(prefs.view)$('view').value=prefs.view;
     if(prefs.bhk!=null){bhk=prefs.bhk;}
-    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent'].forEach(function(id){if(prefs[id]!=null)$(id).checked=prefs[id];});
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier'].forEach(function(id){if(prefs[id]!=null)$(id).checked=prefs[id];});
     if(prefs.areas)AREAS.forEach(function(a){$('area-'+a[0]).checked=prefs.areas.indexOf(a[0])>=0;});
     document.querySelectorAll('#bhk button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===bhk));});
   }
   function readPrefs(){
     prefs={who:$('who').value,cap:+$('cap').value,sort:$('sort').value,view:$('view').value,bhk:bhk,areas:AREAS.filter(function(a){return $('area-'+a[0]).checked;}).map(function(a){return a[0];})};
-    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent'].forEach(function(id){prefs[id]=$(id).checked;});
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier'].forEach(function(id){prefs[id]=$(id).checked;});
     savePrefs();
   }
 
@@ -335,6 +337,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     if(p.noPhotos&&!x.photos)return false;
     if(p.noBusy&&x.flags.some(function(f){return /busy road|main road/.test(f);}))return false;
     if(p.noAgent&&x.postedBy==='Agent')return false;
+    if(p.noPremier&&x.premier)return false;
     return true;
   }
   function sorter(s,view){
@@ -384,7 +387,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     return '<article class="card'+(rankAll<=10&&prefs.sort==='score'?' top':'')+'">'+
       '<div class="rank"><span class="sc num">'+(x.score!=null?x.score:'–')+'</span><span class="of">'+(x.score!=null?'/100':'not scored')+'</span>'+(x.score!=null?'<span class="no">#'+(i+1)+'</span>':'')+'</div>'+
       '<div class="body">'+
-        '<div class="titlerow"><div><div class="title">'+x.bhk+'BHK · '+esc(price)+'</div>'+
+        '<div class="titlerow"><div><div class="title">'+x.bhk+'BHK · '+esc(price)+(x.premier?' <span class="prem">Premier</span>':'')+'</div>'+
         '<div class="where">'+srcTag+esc(x.loc)+street+(x.society?' · '+esc(x.society):'')+esc(metro)+'</div></div>'+
         starGroup(x.id)+'</div>'+
         whoLine(x.id)+
@@ -418,7 +421,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     var bach=nb.filter(function(x){return ['ANYONE','BACHELOR','BACHELOR_MALE','BACHELOR_FEMALE'].indexOf(x.tenants)>=0;}).length;
     var by={}; nb.forEach(function(x){by[x.src]=(by[x.src]||0)+1;});
     var agents=nb.filter(function(x){return x.postedBy==='Agent';}).length;
-    var s=[[nb.length,'listings ranked ('+Object.keys(by).map(function(k){return by[k]+' '+k;}).join(', ')+')'],[agents,'posted by brokers (fee usually one month\'s rent)'],[c25,'at ₹25k or less all-in'],[upper,'above ground with water source stated'],[bach,'open to bachelors']];
+    var s=[[nb.length,'listings ranked ('+Object.keys(by).map(function(k){return by[k]+' '+k;}).join(', ')+')'],[agents,'posted by brokers (fee usually one month\'s rent)'],[nb.filter(function(x){return x.premier;}).length,'Premier homes at ₹30–32k'],[c25,'at ₹25k or less all-in'],[upper,'above ground with water source stated'],[bach,'open to bachelors']];
     $('stats').innerHTML=s.map(function(a){return '<div class="stat"><b class="num">'+a[0]+'</b><span>'+a[1]+'</span></div>';}).join('');
   }
   function renderOthers(){
@@ -429,7 +432,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   }
 
   $('more').addEventListener('click',function(){shown+=25;render();});
-  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
+  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
   $('view').addEventListener('change',function(){
     var v=$('view').value, s=$('sort');
     if(v!=='all'&&s.value==='score')s.value='prio';
