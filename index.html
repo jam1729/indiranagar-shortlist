@@ -53,7 +53,9 @@ header{display:flex;flex-direction:column;gap:10px}
 .ctl > label, .ctl > .lbl{font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ctlrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 select,input[type=range]{font:inherit;width:100%}
-select{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+select,input[type=text]{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}
+input[type=text]{max-width:260px}
+.who{font-size:.82rem;color:var(--amber);font-weight:500}
 input[type=range]{accent-color:var(--green)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;user-select:none}
@@ -170,9 +172,14 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
         <label class="chip"><input type="checkbox" id="noWaterUnknown">Water not stated</label>
         <label class="chip"><input type="checkbox" id="noPhotos">No photos</label>
         <label class="chip"><input type="checkbox" id="noBusy">Busy roads</label>
-        <label class="chip"><input type="checkbox" id="noAgent">Broker listings</label>
-        <label class="chip"><input type="checkbox" id="starOnly">Show starred only</label>
+        <label class="chip"><input type="checkbox" id="noAgent" checked>Broker listings</label>
+        <label class="chip"><input type="checkbox" id="starOnly">Starred only</label>
       </div>
+    </div>
+    <div class="ctl" id="share-ctl">
+      <label for="myname">Your name, for stars</label>
+      <input type="text" id="myname" maxlength="24" placeholder="e.g. Asha" autocomplete="given-name">
+      <span class="note" id="share-note">Stars are saved only in this browser.</span>
     </div>
   </section>
 
@@ -224,7 +231,6 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
 
   <footer>
     <p id="foot">Snapshot taken 20 Nov 2026 from the public search pages of NoBroker, Housing.com and MagicBricks, with no login. On Housing.com, 95 of the 97 listings in budget are from brokers, and many share a rough area pin, so where the location is approximate the area score uses a middle value. MagicBricks listings have no pin at all. 99acres asked for a CAPTCHA after two pages, so it isn't included. The same flat can show up on more than one site. Listings change daily, so make sure one is still live before you spend a NoBroker contact on it.</p>
-    <p>Stars are saved only in this browser.</p>
   </footer>
 </div>
 
@@ -241,11 +247,37 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     if(/tippa|thippa|^hal|hal 3/.test(loc))return 'ntp'; if(/kodihalli/.test(loc))return 'kod';
     if(/domlur|rustam/.test(loc))return 'dom'; if(/jogupalya|ulsoor|halasuru/.test(loc))return 'ulo'; return 'ntp';}
   var OK={all:null,man:['ANYONE','BACHELOR','BACHELOR_MALE'],woman:['ANYONE','BACHELOR','BACHELOR_FEMALE'],family:['ANYONE','FAMILY'],company:['ANYONE','COMPANY']};
-  var KEY='shortlist-v1', stars={}, prefs={};
+  var KEY='shortlist-v1', stars={}, prefs={}, me='';
   try{stars=JSON.parse(localStorage.getItem(KEY+'-stars')||'{}')||{};}catch(e){}
-  try{prefs=JSON.parse(localStorage.getItem(KEY+'-prefs')||'{}')||{};}catch(e){}
+  try{prefs=JSON.parse(localStorage.getItem('shortlist-v2-prefs')||'{}')||{};}catch(e){}
+  try{me=localStorage.getItem('shortlist-name')||'';}catch(e){}
   function saveStars(){try{localStorage.setItem(KEY+'-stars',JSON.stringify(stars));}catch(e){}}
-  function savePrefs(){try{localStorage.setItem(KEY+'-prefs',JSON.stringify(prefs));}catch(e){}}
+  function savePrefs(){try{localStorage.setItem('shortlist-v2-prefs',JSON.stringify(prefs));}catch(e){}}
+
+  // Shared stars: when the hosted copy sets window.SHARED_DB (a Firebase Realtime Database URL),
+  // stars live there as stars/<listing>/<person> = "Display name"; otherwise they stay in this browser.
+  var SHARED=(window.SHARED_DB||'').replace(/\/$/,''), shared={}, sharedSig='';
+  var fbKey=function(s){return String(s).replace(/[.#$\[\]\/]/g,'_');};
+  var myKey=function(){return me.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24);};
+  function whoStarred(id){var o=shared[fbKey(id)]; return o?Object.keys(o).map(function(k){return o[k];}):[];}
+  function starredByMe(id){return SHARED?!!(shared[fbKey(id)]&&myKey()&&shared[fbKey(id)][myKey()]):!!stars[id];}
+  function starredByAny(id){return SHARED?whoStarred(id).length>0:!!stars[id];}
+  function pullShared(){
+    if(!SHARED)return Promise.resolve();
+    return fetch(SHARED+'/stars.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){
+      var sig=JSON.stringify(d||{}); if(sig===sharedSig)return; sharedSig=sig; shared=d||{}; if(nb.length){stats();render();}
+      $('share-note').textContent='Stars are shared with everyone who opens this link.';
+    }).catch(function(){ $('share-note').textContent='Couldn\'t reach the shared stars just now. Your next star will try again.'; });
+  }
+  function toggleShared(id){
+    if(!myKey()){ $('share-note').textContent='Type your name first, so friends can see who starred what.'; $('myname').focus(); return; }
+    var k=fbKey(id), on=starredByMe(id), url=SHARED+'/stars/'+encodeURIComponent(k)+'/'+encodeURIComponent(myKey())+'.json';
+    if(on){ if(shared[k]){delete shared[k][myKey()]; if(!Object.keys(shared[k]).length)delete shared[k];} }
+    else { shared[k]=shared[k]||{}; shared[k][myKey()]=me.trim(); }
+    sharedSig=''; render();
+    fetch(url,{method:on?'DELETE':'PUT',headers:{'Content-Type':'application/json'},body:on?undefined:JSON.stringify(me.trim())})
+      .then(function(r){if(!r.ok)throw new Error(r.status);}).catch(function(){ $('share-note').textContent='That star didn\'t save. Check your connection and try again.'; }).then(pullShared);
+  }
   var $=function(id){return document.getElementById(id);};
   var rupee=function(n){return '₹'+Number(n).toLocaleString('en-IN');};
   var k=function(n){return '₹'+(Math.round(n/100)/10)+'k';};
@@ -278,7 +310,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     if(p.noWaterUnknown&&!x.water)return false;
     if(p.noPhotos&&!x.photos)return false;
     if(p.noBusy&&x.flags.some(function(f){return /busy road|main road/.test(f);}))return false;
-    if(p.starOnly&&!stars[x.id])return false;
+    if(p.starOnly&&!starredByAny(x.id))return false;
     if(p.noAgent&&x.postedBy==='Agent')return false;
     return true;
   }
@@ -320,7 +352,8 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       '<div class="body">'+
         '<div class="titlerow"><div><div class="title">'+x.bhk+'BHK · '+esc(price)+'</div>'+
         '<div class="where">'+srcTag+esc(x.loc)+street+(x.society?' · '+esc(x.society):'')+esc(metro)+'</div></div>'+
-        '<button type="button" class="btn star" data-id="'+esc(x.id)+'" aria-pressed="'+(!!stars[x.id])+'" aria-label="Star this listing">'+(stars[x.id]?'★':'☆')+'</button></div>'+
+        '<button type="button" class="btn star" data-id="'+esc(x.id)+'" aria-pressed="'+starredByMe(x.id)+'" aria-label="Star this listing">'+(starredByMe(x.id)?'★':'☆')+(SHARED&&whoStarred(x.id).length?' '+whoStarred(x.id).length:'')+'</button></div>'+
+        (SHARED&&whoStarred(x.id).length?'<div class="who">★ '+esc(whoStarred(x.id).join(', '))+'</div>':'')+
         (x.score!=null?'<div class="bar" aria-hidden="true">'+bar+'</div>':'')+
         '<div class="facts">'+facts+'</div>'+
         (flags?'<div class="flags">'+flags+'</div>':'')+
@@ -358,12 +391,18 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
   areaBox.addEventListener('change',function(){shown=25;render();});
   document.querySelectorAll('#bhk button').forEach(function(b){b.addEventListener('click',function(){bhk=+b.dataset.v;document.querySelectorAll('#bhk button').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});shown=25;render();});});
-  document.addEventListener('click',function(e){var b=e.target.closest('.star');if(!b)return;var id=b.dataset.id;if(stars[id])delete stars[id];else stars[id]=1;saveStars();b.setAttribute('aria-pressed',String(!!stars[id]));b.textContent=stars[id]?'★':'☆';if(prefs.starOnly)render();});
+  document.addEventListener('click',function(e){var b=e.target.closest('.star');if(!b)return;var id=b.dataset.id;
+    if(SHARED){toggleShared(id);return;}
+    if(stars[id])delete stars[id];else stars[id]=1;saveStars();b.setAttribute('aria-pressed',String(!!stars[id]));b.textContent=stars[id]?'★':'☆';if(prefs.starOnly)render();});
+  $('myname').value=me;
+  $('myname').addEventListener('input',function(){me=$('myname').value;try{localStorage.setItem('shortlist-name',me);}catch(e){} if(SHARED)render();});
+  if(!SHARED)$('myname').closest('.ctl').hidden=true;
 
   restore();
   fetch('listings.json').then(function(r){return r.json();}).then(function(d){
     all=d.items; nb=all.filter(function(x){return x.score!=null;}); other=all.filter(function(x){return x.score==null;});
     stats(); render(); renderOthers();
+    if(SHARED){pullShared(); setInterval(pullShared,15000); document.addEventListener('visibilitychange',function(){if(!document.hidden)pullShared();});}
   }).catch(function(){ $('list').innerHTML='<div class="empty">The listing data didn\'t load. Reload the page to try again.</div>'; });
 })();
 </script>
