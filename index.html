@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Indiranagar Rental Shortlist</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: phone-first ranked list; filter panel on top, listing cards with a six-part score bar; to-let red reserved for warnings */
+:root{
+  --bg:#f5f7f3; --surface:#ffffff; --sunk:#e9eee6; --fg:#1b2420; --muted:#5b6a62; --line:#d5ddd3;
+  --green:#2f6b4f; --green-soft:#dcebe2; --red:#c0362c; --red-soft:#f8e1de; --amber:#a86a00; --amber-soft:#f7ebcf;
+  --s-loc:#2f6b4f; --s-light:#d39a1c; --s-water:#2f74b5; --s-cost:#7a4fa3; --s-qual:#8a948e; --s-trust:#2d9a96;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"Inter",-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121815; --surface:#1a221e; --sunk:#202a25; --fg:#e6ede8; --muted:#9aaba1; --line:#2e3a34;
+  --green:#7cc49f; --green-soft:#1f3329; --red:#ff7a6e; --red-soft:#3a1f1c; --amber:#e5b453; --amber-soft:#3a3020;
+  --s-loc:#6cbf95; --s-light:#e8b64a; --s-water:#6aa7e0; --s-cost:#b18ad8; --s-qual:#9aa59f; --s-trust:#5cc6c1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121815; --surface:#1a221e; --sunk:#202a25; --fg:#e6ede8; --muted:#9aaba1; --line:#2e3a34;
+  --green:#7cc49f; --green-soft:#1f3329; --red:#ff7a6e; --red-soft:#3a1f1c; --amber:#e5b453; --amber-soft:#3a3020;
+  --s-loc:#6cbf95; --s-light:#e8b64a; --s-water:#6aa7e0; --s-cost:#b18ad8; --s-qual:#9aa59f; --s-trust:#5cc6c1; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 56px;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:2rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.3rem;font-weight:800}
+h3{font-size:1.02rem;font-weight:600}
+p{margin:0}
+a{color:var(--green)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.board{align-self:flex-start;border:2px solid var(--red);color:var(--red);font-family:var(--display);font-weight:800;letter-spacing:.14em;padding:2px 10px;font-size:.8rem;border-radius:3px}
+header{display:flex;flex-direction:column;gap:10px}
+.lead{color:var(--muted);max-width:62ch}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stat b{display:block;font-family:var(--display);font-size:1.5rem;font-weight:800}
+.stat span{font-size:.8rem;color:var(--muted)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.ctl{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ctl > label, .ctl > .lbl{font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ctlrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+select,input[type=range]{font:inherit;width:100%}
+select{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+input[type=range]{accent-color:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;user-select:none}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip:has(input:checked){background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.chip:has(input:focus-visible){outline:2px solid var(--green);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;align-self:flex-start}
+.seg button{font:inherit;font-size:.85rem;border:0;background:var(--surface);color:var(--fg);padding:6px 14px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--green);color:var(--surface)}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.resultline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+
+.list{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:64px 1fr;gap:14px;min-width:0}
+.card.top{border-color:var(--green)}
+.rank{display:flex;flex-direction:column;align-items:center;gap:2px}
+.rank .sc{font-family:var(--display);font-weight:800;font-size:1.7rem;line-height:1}
+.rank .of{font-size:.7rem;color:var(--muted)}
+.rank .no{font-size:.72rem;color:var(--muted);margin-top:4px}
+.body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.titlerow{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.title{font-family:var(--display);font-weight:600;font-size:1.08rem}
+.where{font-size:.88rem;color:var(--muted);overflow-wrap:anywhere}
+.bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--sunk)}
+.bar i{display:block;height:100%}
+.facts{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.86rem}
+.facts span{white-space:nowrap}
+.facts b{font-weight:600}
+.flags{display:flex;flex-wrap:wrap;gap:6px}
+.flag{font-size:.75rem;padding:2px 8px;border-radius:999px;background:var(--amber-soft);color:var(--amber);font-weight:500}
+.flag.bad{background:var(--red-soft);color:var(--red)}
+.flag.ok{background:var(--green-soft);color:var(--green)}
+.links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.86rem}
+.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:500;font-size:.85rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--green);border-color:var(--green);color:var(--surface)}
+.star{font-size:1.1rem;line-height:1;padding:4px 10px}
+.star[aria-pressed=true]{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.more{align-self:center}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.86rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--sunk);font-weight:600}
+tr:last-child td{border-bottom:0}
+.note{font-size:.85rem;color:var(--muted)}
+.empty{padding:24px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px}
+footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+
+@media (max-width:480px){
+  h1{font-size:1.7rem}
+  .card{grid-template-columns:1fr;gap:10px}
+  .rank{flex-direction:row;align-items:baseline;gap:6px}
+  .rank .no{margin:0 0 0 auto}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="board">TO LET</span>
+    <h1>Indiranagar Rental Shortlist</h1>
+    <p class="lead" id="lead">Every 1BHK and 2BHK up to ₹31k all-in listed on NoBroker, Housing.com and MagicBricks around Indiranagar, JB Nagar, New Thippasandra, Kodihalli and Domlur on 20 Nov 2026. Each is ranked against your priorities: safety and walkability first, then light and air, then water.</p>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <section class="panel" aria-label="Filters">
+    <div class="ctlrow">
+      <div class="ctl">
+        <label for="who">Who's moving in</label>
+        <select id="who">
+          <option value="all">Show every listing</option>
+          <option value="man">Single man</option>
+          <option value="woman">Single woman</option>
+          <option value="family">Family / couple</option>
+          <option value="company">Company lease</option>
+        </select>
+      </div>
+      <div class="ctl">
+        <label for="cap">Max all-in rent: <span id="capv" class="num"></span></label>
+        <input type="range" id="cap" min="15000" max="31000" step="500" value="30000">
+      </div>
+      <div class="ctl">
+        <label for="sort">Sort by</label>
+        <select id="sort">
+          <option value="score">Best match</option>
+          <option value="rent">Cheapest all-in</option>
+          <option value="sqft">Largest</option>
+          <option value="metro">Closest to metro</option>
+          <option value="new">Most recently listed</option>
+        </select>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Size</span>
+      <div class="seg" role="group" aria-label="Size" id="bhk">
+        <button type="button" data-v="0" aria-pressed="true">Any</button>
+        <button type="button" data-v="1" aria-pressed="false">1BHK</button>
+        <button type="button" data-v="2" aria-pressed="false">2BHK</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Areas</span>
+      <div class="chips" id="areas"></div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Hide</span>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="noGround" checked>Ground floor</label>
+        <label class="chip"><input type="checkbox" id="noWaterUnknown">Water not stated</label>
+        <label class="chip"><input type="checkbox" id="noPhotos">No photos</label>
+        <label class="chip"><input type="checkbox" id="noBusy">Busy roads</label>
+        <label class="chip"><input type="checkbox" id="noAgent">Broker listings</label>
+        <label class="chip"><input type="checkbox" id="starOnly">Show starred only</label>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="resultline">
+      <h2 id="count">Listings</h2>
+      <div class="legend" aria-label="Score parts">
+        <span><i style="background:var(--s-loc)"></i>Area + walk 30</span>
+        <span><i style="background:var(--s-light)"></i>Light + air 25</span>
+        <span><i style="background:var(--s-water)"></i>Water 15</span>
+        <span><i style="background:var(--s-cost)"></i>Value 15</span>
+        <span><i style="background:var(--s-qual)"></i>Building 5</span>
+        <span><i style="background:var(--s-trust)"></i>Terms + listing 10</span>
+      </div>
+    </div>
+    <div class="list" id="list"><div class="empty">Loading listings…</div></div>
+    <button type="button" class="btn more" id="more" hidden>Show 25 more</button>
+  </section>
+
+  <section id="others-sec" style="display:flex;flex-direction:column;gap:12px" hidden>
+    <div>
+      <p class="eyebrow">Left out of the ranking</p>
+      <h2>Treat with caution</h2>
+    </div>
+    <p class="note">These MagicBricks and Telegram listings showed warning signs: a price far below the going rate, text that contradicts itself, one flat posted several times, or a single room passed off as a 1BHK. Never pay a token or "visit fee" before you've seen the flat and checked the owner's property tax receipt.</p>
+    <div class="list" id="others"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div>
+      <p class="eyebrow">How the score works</p>
+      <h2>100 points, weighted to your priorities</h2>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Part</th><th>Max</th><th>What earns points</th></tr></thead>
+        <tbody>
+          <tr><td>Area + walk</td><td class="num">30</td><td>Locality: Indiranagar 24, JB Nagar 23, HAL 3rd Stage and Kodihalli 22, New Thippasandra 21, Domlur 17, Jogupalya 14. Minus 6 on 100 Ft Rd, 12th Main or Double Road, minus 2 on other main roads, minus 3 in denser older lanes (the -palya pockets, Lakshmipuram, Eshwara Layout). Plus up to 6 for walking distance to Indiranagar or Swami Vivekananda Rd metro.</td></tr>
+          <tr><td>Light + air</td><td class="num">25</td><td>Floor: ground 0, first 10, second or higher 15. Facing east, north-east or north 6, other directions 3, not stated 2. A balcony adds 4.</td></tr>
+          <tr><td>Water</td><td class="num">15</td><td>Cauvery and borewell 15, Cauvery only 12, borewell only 5, not stated 6.</td></tr>
+          <tr><td>Value</td><td class="num">15</td><td>All-in rent up to ₹25k 11, up to ₹27.5k 8, up to ₹30k 5. Plus 2 for a 2BHK within budget, plus 2 if it's roomy (1BHK 550+ sq ft, 2BHK 850+).</td></tr>
+          <tr><td>Building</td><td class="num">5</td><td>Newer building (5 years or less 3, 10 years or less 2), semi- or fully furnished 1, parking 1.</td></tr>
+          <tr><td>Terms + listing</td><td class="num">10</td><td>Deposit of 3 months or less 4, up to 4 months 3, up to 6 months 1. Six or more photos 3, NoBroker-verified 1, listed in the last 14 days 2.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The score is a way to sort, not a verdict. Owners often leave floor, facing and water blank, so a missing field scores low and a strong flat can rank lower than it deserves. Locality names come from NoBroker and are rough: a listing tagged Kodihalli can sit on 100 Ft Rd. Check the map pin before you call.</p>
+  </section>
+
+  <footer>
+    <p id="foot">Snapshot taken 20 Nov 2026 from the public search pages of NoBroker, Housing.com and MagicBricks, with no login. On Housing.com, 95 of the 97 listings in budget are from brokers, and many share a rough area pin, so where the location is approximate the area score uses a middle value. MagicBricks listings have no pin at all. 99acres asked for a CAPTCHA after two pages, so it isn't included. The same flat can show up on more than one site. Listings change daily, so make sure one is still live before you spend a NoBroker contact on it.</p>
+    <p>Stars are saved only in this browser.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var FURN={S:'Semi-furnished',F:'Furnished',U:'Unfurnished'};
+  var BT={AP:'Apartment block',IH:'Independent house',IF:'Independent floor'};
+  var WATER={CORP_BORE:'Cauvery + borewell',CORPORATION:'Cauvery',BOREWELL:'Borewell only'};
+  var TEN={ANYONE:'Anyone',BACHELOR:'Bachelors',BACHELOR_MALE:'Men only',BACHELOR_FEMALE:'Women only',FAMILY:'Family only',COMPANY:'Company lease'};
+  var FACE={N:'North',E:'East',S:'South',W:'West',NE:'North-east',NW:'North-west',SE:'South-east',SW:'South-west'};
+  var AREAS=[['ind','Indiranagar'],['jbn','JB Nagar'],['ntp','New Thippasandra / HAL 3rd'],['kod','Kodihalli'],['dom','Domlur side'],['ulo','Jogupalya / Ulsoor']];
+  function areaOf(loc){loc=(loc||'').toLowerCase();
+    if(/indira/.test(loc))return 'ind'; if(/jeevan|jb nagar|bima|bhima/.test(loc))return 'jbn';
+    if(/tippa|thippa|^hal|hal 3/.test(loc))return 'ntp'; if(/kodihalli/.test(loc))return 'kod';
+    if(/domlur|rustam/.test(loc))return 'dom'; if(/jogupalya|ulsoor|halasuru/.test(loc))return 'ulo'; return 'ntp';}
+  var OK={all:null,man:['ANYONE','BACHELOR','BACHELOR_MALE'],woman:['ANYONE','BACHELOR','BACHELOR_FEMALE'],family:['ANYONE','FAMILY'],company:['ANYONE','COMPANY']};
+  var KEY='shortlist-v1', stars={}, prefs={};
+  try{stars=JSON.parse(localStorage.getItem(KEY+'-stars')||'{}')||{};}catch(e){}
+  try{prefs=JSON.parse(localStorage.getItem(KEY+'-prefs')||'{}')||{};}catch(e){}
+  function saveStars(){try{localStorage.setItem(KEY+'-stars',JSON.stringify(stars));}catch(e){}}
+  function savePrefs(){try{localStorage.setItem(KEY+'-prefs',JSON.stringify(prefs));}catch(e){}}
+  var $=function(id){return document.getElementById(id);};
+  var rupee=function(n){return '₹'+Number(n).toLocaleString('en-IN');};
+  var k=function(n){return '₹'+(Math.round(n/100)/10)+'k';};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+
+  var all=[], nb=[], other=[], shown=25, bhk=0;
+  var areaBox=$('areas');
+  AREAS.forEach(function(a){var l=document.createElement('label');l.className='chip';l.innerHTML='<input type="checkbox" id="area-'+a[0]+'" value="'+a[0]+'" checked>'+esc(a[1]);areaBox.appendChild(l);});
+
+  function restore(){
+    if(prefs.who)$('who').value=prefs.who; if(prefs.cap)$('cap').value=prefs.cap; if(prefs.sort)$('sort').value=prefs.sort;
+    if(prefs.bhk!=null){bhk=prefs.bhk;}
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){if(prefs[id]!=null)$(id).checked=prefs[id];});
+    if(prefs.areas)AREAS.forEach(function(a){$('area-'+a[0]).checked=prefs.areas.indexOf(a[0])>=0;});
+    document.querySelectorAll('#bhk button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===bhk));});
+  }
+  function readPrefs(){
+    prefs={who:$('who').value,cap:+$('cap').value,sort:$('sort').value,bhk:bhk,areas:AREAS.filter(function(a){return $('area-'+a[0]).checked;}).map(function(a){return a[0];})};
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){prefs[id]=$(id).checked;});
+    savePrefs();
+  }
+
+  function passes(x){
+    var p=prefs;
+    if(x.allin>p.cap)return false;
+    if(bhk&&x.bhk!==bhk)return false;
+    if(p.areas.indexOf(areaOf(x.loc))<0)return false;
+    if(OK[p.who]&&x.tenants&&OK[p.who].indexOf(x.tenants)<0)return false;
+    if(p.noGround&&x.floor===0)return false;
+    if(p.noWaterUnknown&&!x.water)return false;
+    if(p.noPhotos&&!x.photos)return false;
+    if(p.noBusy&&x.flags.some(function(f){return /busy road|main road/.test(f);}))return false;
+    if(p.starOnly&&!stars[x.id])return false;
+    if(p.noAgent&&x.postedBy==='Agent')return false;
+    return true;
+  }
+  function sorter(s){
+    if(s==='rent')return function(a,b){return a.allin-b.allin||b.score-a.score;};
+    if(s==='sqft')return function(a,b){return (b.sqft||0)-(a.sqft||0);};
+    if(s==='metro')return function(a,b){return (a.metroKm==null?9:a.metroKm)-(b.metroKm==null?9:b.metroKm);};
+    if(s==='new')return function(a,b){return (a.days==null?999:a.days)-(b.days==null?999:b.days);};
+    return function(a,b){return b.score-a.score;};
+  }
+  function flagClass(f){if(/^owner listing|^power backup/.test(f))return 'flag ok';return /busy road|ground floor|over|borewell|deposit (7|8|9|1\d)|scam|stale|contradicts|posted 3|single room|sale text|looks wrong|not stated$/.test(f)&&!/^water not stated$|^deposit not stated$/.test(f)?'flag bad':'flag';}
+
+  function card(x,i,rankAll){
+    var sub=x.sub||{}; var parts=[['loc','--s-loc'],['light','--s-light'],['water','--s-water'],['cost','--s-cost'],['qual','--s-qual'],['trust','--s-trust']];
+    var bar=parts.map(function(p){return '<i style="width:'+(sub[p[0]]||0)+'%;background:var('+p[1]+')" title="'+p[0]+' '+(sub[p[0]]||0)+'"></i>';}).join('');
+    var fl=x.floor===0?'Ground floor':x.floor==null?'Floor not stated':'Floor '+x.floor+(x.tf?' of '+x.tf:'');
+    var facts=[
+      '<span><b>'+(x.dep?k(x.dep):'—')+'</b> deposit'+(x.depM?' ('+x.depM+' mo)':'')+'</span>',
+      x.sqft?'<span><b class="num">'+x.sqft+'</b> sq ft</span>':'',
+      '<span>'+esc(fl)+'</span>',
+      x.facing&&FACE[x.facing]?'<span>Faces '+FACE[x.facing]+'</span>':'',
+      '<span>'+esc(WATER[x.water]||(x.waterNote?'Water 24 hrs (source not stated)':'Water not stated'))+'</span>',
+      '<span>'+esc(FURN[x.furn]||'')+'</span>',
+      '<span>'+esc(BT[x.btype]||'')+'</span>',
+      x.tenants?'<span>'+esc(TEN[x.tenants]||x.tenants)+'</span>':'',
+      x.age!=null?'<span>'+x.age+' yr old</span>':'',
+      x.photos!=null?'<span>'+x.photos+' photos</span>':''
+    ].filter(Boolean).join('');
+    var when=[]; if(x.days!=null)when.push(x.days===0?'Listed today':'Listed '+x.days+' d ago'); if(x.availIn!=null)when.push(x.availIn<=0?'available now':'available in '+x.availIn+' d');
+    var map=x.lat?'<a class="btn" href="https://www.google.com/maps/search/?api=1&query='+x.lat+','+x.lon+'" target="_blank" rel="noopener">Map pin</a>':'<span class="note">No exact pin</span>';
+    var flags=x.flags.map(function(f){return '<span class="'+flagClass(f)+'">'+esc(f)+'</span>';}).join('');
+    var metro=x.metroKm!=null?' · '+x.metroKm+' km to metro':'';
+    var maint=x.allin>x.rent?' (rent '+k(x.rent)+' + maintenance)':'';
+    var price=x.allin?rupee(x.allin)+' all-in'+maint:'rent not stated';
+    var srcTag=x.src!=='NoBroker'?'<span class="flag ok">'+esc(x.src)+(x.postedBy?' · '+esc(x.postedBy):'')+'</span> ':'';
+    var street=x.street&&x.street!==x.loc?' · '+esc(x.street):'';
+    return '<article class="card'+(rankAll<=10&&prefs.sort==='score'?' top':'')+'">'+
+      '<div class="rank"><span class="sc num">'+(x.score!=null?x.score:'–')+'</span><span class="of">'+(x.score!=null?'/100':'not scored')+'</span>'+(x.score!=null?'<span class="no">#'+(i+1)+'</span>':'')+'</div>'+
+      '<div class="body">'+
+        '<div class="titlerow"><div><div class="title">'+x.bhk+'BHK · '+esc(price)+'</div>'+
+        '<div class="where">'+srcTag+esc(x.loc)+street+(x.society?' · '+esc(x.society):'')+esc(metro)+'</div></div>'+
+        '<button type="button" class="btn star" data-id="'+esc(x.id)+'" aria-pressed="'+(!!stars[x.id])+'" aria-label="Star this listing">'+(stars[x.id]?'★':'☆')+'</button></div>'+
+        (x.score!=null?'<div class="bar" aria-hidden="true">'+bar+'</div>':'')+
+        '<div class="facts">'+facts+'</div>'+
+        (flags?'<div class="flags">'+flags+'</div>':'')+
+        '<div class="links"><a class="btn primary" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open on '+esc(x.src)+'</a>'+map+'<span class="note">'+esc(when.join(', '))+(x.code?' · '+esc(x.code):'')+'</span></div>'+
+      '</div></article>';
+  }
+
+  function render(){
+    readPrefs(); $('capv').textContent=rupee(prefs.cap);
+    var rows=nb.filter(passes).sort(sorter(prefs.sort));
+    var rankMap={}; nb.slice().sort(function(a,b){return b.score-a.score;}).forEach(function(x,i){rankMap[x.id]=i+1;});
+    $('count').textContent=rows.length+' of '+nb.length+' listings match';
+    var list=$('list');
+    if(!rows.length){list.innerHTML='<div class="empty">Nothing matches these filters. Try raising the rent cap or showing ground-floor homes.</div>';$('more').hidden=true;return;}
+    list.innerHTML=rows.slice(0,shown).map(function(x,i){return card(x,i,rankMap[x.id]);}).join('');
+    $('more').hidden=rows.length<=shown; $('more').textContent='Show '+Math.min(25,rows.length-shown)+' more';
+  }
+  function stats(){
+    var c25=nb.filter(function(x){return x.allin<=25000;}).length;
+    var upper=nb.filter(function(x){return x.floor>=1&&x.water;}).length;
+    var bach=nb.filter(function(x){return ['ANYONE','BACHELOR','BACHELOR_MALE','BACHELOR_FEMALE'].indexOf(x.tenants)>=0;}).length;
+    var by={}; nb.forEach(function(x){by[x.src]=(by[x.src]||0)+1;});
+    var agents=nb.filter(function(x){return x.postedBy==='Agent';}).length;
+    var s=[[nb.length,'listings ranked ('+Object.keys(by).map(function(k){return by[k]+' '+k;}).join(', ')+')'],[agents,'posted by brokers (fee usually one month\'s rent)'],[c25,'at ₹25k or less all-in'],[upper,'above ground with water source stated'],[bach,'open to bachelors']];
+    $('stats').innerHTML=s.map(function(a){return '<div class="stat"><b class="num">'+a[0]+'</b><span>'+a[1]+'</span></div>';}).join('');
+  }
+  function renderOthers(){
+    if(!other.length)return;
+    $('others-sec').hidden=false;
+    other.sort(function(a,b){return (b.score||0)-(a.score||0);});
+    $('others').innerHTML=other.map(function(x,i){return card(x,i,999);}).join('');
+  }
+
+  $('more').addEventListener('click',function(){shown+=25;render();});
+  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent','starOnly'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
+  areaBox.addEventListener('change',function(){shown=25;render();});
+  document.querySelectorAll('#bhk button').forEach(function(b){b.addEventListener('click',function(){bhk=+b.dataset.v;document.querySelectorAll('#bhk button').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});shown=25;render();});});
+  document.addEventListener('click',function(e){var b=e.target.closest('.star');if(!b)return;var id=b.dataset.id;if(stars[id])delete stars[id];else stars[id]=1;saveStars();b.setAttribute('aria-pressed',String(!!stars[id]));b.textContent=stars[id]?'★':'☆';if(prefs.starOnly)render();});
+
+  restore();
+  fetch('listings.json').then(function(r){return r.json();}).then(function(d){
+    all=d.items; nb=all.filter(function(x){return x.score!=null;}); other=all.filter(function(x){return x.score==null;});
+    stats(); render(); renderOthers();
+  }).catch(function(){ $('list').innerHTML='<div class="empty">The listing data didn\'t load. Reload the page to try again.</div>'; });
+})();
+</script>
+
+</body>
+</html>
