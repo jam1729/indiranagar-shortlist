@@ -15,18 +15,18 @@
 :root{
   --bg:#f5f7f3; --surface:#ffffff; --sunk:#e9eee6; --fg:#1b2420; --muted:#5b6a62; --line:#d5ddd3;
   --green:#2f6b4f; --green-soft:#dcebe2; --red:#c0362c; --red-soft:#f8e1de; --amber:#a86a00; --amber-soft:#f7ebcf;
-  --s-loc:#2f6b4f; --s-light:#d39a1c; --s-water:#2f74b5; --s-cost:#7a4fa3; --s-qual:#8a948e; --s-trust:#2d9a96;
+  --s-loc:#2f6b4f; --s-light:#d39a1c; --s-water:#2f74b5; --s-cost:#7a4fa3; --s-qual:#8a948e; --s-trust:#2d9a96; --s-rent:#b5487a;
   --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
   --body:"Inter",-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#121815; --surface:#1a221e; --sunk:#202a25; --fg:#e6ede8; --muted:#9aaba1; --line:#2e3a34;
   --green:#7cc49f; --green-soft:#1f3329; --red:#ff7a6e; --red-soft:#3a1f1c; --amber:#e5b453; --amber-soft:#3a3020;
-  --s-loc:#6cbf95; --s-light:#e8b64a; --s-water:#6aa7e0; --s-cost:#b18ad8; --s-qual:#9aa59f; --s-trust:#5cc6c1; color-scheme:dark}}
+  --s-loc:#6cbf95; --s-light:#e8b64a; --s-water:#6aa7e0; --s-cost:#b18ad8; --s-qual:#9aa59f; --s-trust:#5cc6c1; --s-rent:#e58db4; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#121815; --surface:#1a221e; --sunk:#202a25; --fg:#e6ede8; --muted:#9aaba1; --line:#2e3a34;
   --green:#7cc49f; --green-soft:#1f3329; --red:#ff7a6e; --red-soft:#3a1f1c; --amber:#e5b453; --amber-soft:#3a3020;
-  --s-loc:#6cbf95; --s-light:#e8b64a; --s-water:#6aa7e0; --s-cost:#b18ad8; --s-qual:#9aa59f; --s-trust:#5cc6c1; color-scheme:dark}
+  --s-loc:#6cbf95; --s-light:#e8b64a; --s-water:#6aa7e0; --s-cost:#b18ad8; --s-qual:#9aa59f; --s-trust:#5cc6c1; --s-rent:#e58db4; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body)}
@@ -99,6 +99,11 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
 .stars button:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
 .more{align-self:center}
 
+.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:0}
+.tabs button{font:inherit;font-family:var(--display);font-weight:600;font-size:1rem;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:8px 4px 10px;margin-right:12px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.tabs button span{font-family:var(--body);font-weight:500;font-size:.75rem;color:var(--muted)}
+.tabs button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--red)}
+.tabs button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
@@ -127,6 +132,11 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     <h1>Indiranagar Rental Shortlist</h1>
     <p class="lead" id="lead">Every 1BHK and 2BHK up to ₹32k all-in listed on NoBroker, 99acres, Housing.com and MagicBricks around Indiranagar, JB Nagar, New Thippasandra, Kodihalli and Domlur on 20–21 Nov 2026. Homes between ₹30k and ₹32k are marked Premier. Each is ranked against your priorities: safety and walkability first, then light and air, then water.</p>
   </header>
+
+  <nav class="tabs" role="tablist" aria-label="Lists">
+    <button type="button" role="tab" id="tab-all" data-tab="all" aria-selected="true">All homes<span>1/2BHK up to ₹32k, ranked on value</span></button>
+    <button type="button" role="tab" id="tab-stay" data-tab="stay" aria-selected="false">Furnished stays<span>Good homes up to ₹36k, best first</span></button>
+  </nav>
 
   <div class="stats" id="stats"></div>
 
@@ -186,7 +196,8 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
         <label class="chip"><input type="checkbox" id="noPhotos">No photos</label>
         <label class="chip"><input type="checkbox" id="noBusy">Busy roads</label>
         <label class="chip"><input type="checkbox" id="noAgent" checked>Broker listings</label>
-        <label class="chip"><input type="checkbox" id="noPremier">Premier (₹30–32k)</label>
+        <label class="chip"><input type="checkbox" id="noPremier"><span id="prem-label">Premier (₹30–32k)</span></label>
+        <label class="chip" id="onlyFull-chip" hidden><input type="checkbox" id="onlyFull">Semi-furnished</label>
       </div>
     </div>
     <div class="ctl">
@@ -203,7 +214,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   <section style="display:flex;flex-direction:column;gap:12px">
     <div class="resultline">
       <h2 id="count">Listings</h2>
-      <div class="legend" aria-label="Score parts">
+      <div class="legend" id="legend" aria-label="Score parts">
         <span><i style="background:var(--s-loc)"></i>Area + walk 30</span>
         <span><i style="background:var(--s-light)"></i>Light + air 25</span>
         <span><i style="background:var(--s-water)"></i>Water 15</span>
@@ -221,7 +232,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       <p class="eyebrow">Left out of the ranking</p>
       <h2>Treat with caution</h2>
     </div>
-    <p class="note">These MagicBricks and Telegram listings showed warning signs: a price far below the going rate, text that contradicts itself, one flat posted several times, or a single room passed off as a 1BHK. Never pay a token or "visit fee" before you've seen the flat and checked the owner's property tax receipt.</p>
+    <p class="note" id="others-note">These MagicBricks and Telegram listings showed warning signs: a price far below the going rate, text that contradicts itself, one flat posted several times, or a single room passed off as a 1BHK. Never pay a token or "visit fee" before you've seen the flat and checked the owner's property tax receipt.</p>
     <div class="list" id="others"></div>
   </section>
 
@@ -230,7 +241,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       <p class="eyebrow">How the score works</p>
       <h2>100 points, weighted to your priorities</h2>
     </div>
-    <div class="tablebox">
+    <div class="tablebox" id="score-all">
       <table>
         <thead><tr><th>Part</th><th>Max</th><th>What earns points</th></tr></thead>
         <tbody>
@@ -243,10 +254,25 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
         </tbody>
       </table>
     </div>
+    <div class="tablebox" id="score-stay" hidden>
+      <table>
+        <thead><tr><th>Part</th><th>Max</th><th>What earns points</th></tr></thead>
+        <tbody>
+          <tr><td>Area + walk</td><td class="num">35</td><td>Locality: Indiranagar 26, JB Nagar 24, Kodihalli 23, HAL 3rd Stage and New Thippasandra 22, Rustam Bagh 21, Domlur 18, Jogupalya 14. Minus 8 on 100 Ft Rd, 12th Main or Double Road, minus 3 on other main roads, minus 4 in denser older lanes. Plus up to 9 for walking distance to Indiranagar or Swami Vivekananda Rd metro.</td></tr>
+          <tr><td>Light + air</td><td class="num">20</td><td>First floor 8, second or higher 12, not stated 5. Facing east, north or north-east 5, other 3. A balcony 3. "Natural light" or "cross ventilation" noted by the lister adds 1 each.</td></tr>
+          <tr><td>Furnishing</td><td class="num">15</td><td>Fully furnished 15, semi-furnished 7. Unfurnished homes aren't in this list.</td></tr>
+          <tr><td>Water</td><td class="num">10</td><td>Cauvery and borewell 10, Cauvery only 8, borewell only 3, not stated 4.</td></tr>
+          <tr><td>Building</td><td class="num">10</td><td>Newer building up to 4, lift 2, security or gated 2, power backup 2.</td></tr>
+          <tr><td>Terms</td><td class="num">5</td><td>Owner listing 3 (no brokerage, which hurts most on a short stay). Deposit of 3 months or less 2, up to 4 months 1.</td></tr>
+          <tr><td>Rent</td><td class="num">5</td><td>Up to ₹25k 5, ₹28k 4, ₹31k 3, ₹34k 2, ₹36k 1. Rent counts least here; equal scores are ordered cheapest first.</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p class="note">The score is a way to sort, not a verdict. Owners often leave floor, facing and water blank, so a missing field scores low and a strong flat can rank lower than it deserves. Locality names come from NoBroker and are rough: a listing tagged Kodihalli can sit on 100 Ft Rd. Check the map pin before you call.</p>
   </section>
 
   <footer>
+    <p id="foot-stay" hidden>Furnished stays: pulled on 21 Nov 2026 from NoBroker and Housing.com (fresh), 99acres (pages 1–5 fresh, the rest from 20 Nov up to ₹32k, as 99acres asked for a CAPTCHA) and MagicBricks (up to ₹30k only). Ground-floor and unfurnished homes are left out. For a stay of a few months, ask every owner about the lock-in period and notice before you visit; many want 11 months.</p>
     <p id="foot">Snapshot taken 20 Nov 2026 from the public search pages of NoBroker, Housing.com and MagicBricks, with no login. On Housing.com, 95 of the 97 listings in budget are from brokers, and many share a rough area pin, so where the location is approximate the area score uses a middle value. MagicBricks listings have no pin at all. On 99acres, broker posts with no posting date, ones over a year old, or ones pinned far from their stated area are moved to the caution list. The same flat can show up on more than one site. Listings change daily, so make sure one is still live before you spend a NoBroker contact on it.</p>
   </footer>
 </div>
@@ -266,10 +292,16 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   var OK={all:null,man:['ANYONE','BACHELOR','BACHELOR_MALE'],woman:['ANYONE','BACHELOR','BACHELOR_FEMALE'],family:['ANYONE','FAMILY'],company:['ANYONE','COMPANY']};
   var KEY='shortlist-v1', stars={}, prefs={}, me='';
   try{stars=JSON.parse(localStorage.getItem(KEY+'-stars')||'{}')||{};}catch(e){}
-  try{prefs=JSON.parse(localStorage.getItem('shortlist-v3-prefs')||'{}')||{};}catch(e){}
+  var TAB='all', DS={};
+  var PREFKEY={all:'shortlist-v3-prefs',stay:'shortlist-stay-prefs'};
+  var DEF={
+    all:{who:'all',cap:32000,sort:'score',view:'all',bhk:0,areas:null,noGround:true,noWaterUnknown:false,noPhotos:false,noBusy:false,noAgent:true,noPremier:false,onlyFull:false},
+    stay:{who:'all',cap:36000,sort:'score',view:'all',bhk:0,areas:null,noGround:true,noWaterUnknown:false,noPhotos:false,noBusy:false,noAgent:false,noPremier:false,onlyFull:false}};
+  function loadPrefs(){var saved={}; try{saved=JSON.parse(localStorage.getItem(PREFKEY[TAB])||'{}')||{};}catch(e){} prefs={}; Object.keys(DEF[TAB]).forEach(function(k){prefs[k]=saved[k]!=null?saved[k]:DEF[TAB][k];});}
+  loadPrefs();
   try{me=localStorage.getItem('shortlist-name')||'';}catch(e){}
   function saveStars(){try{localStorage.setItem(KEY+'-stars',JSON.stringify(stars));}catch(e){}}
-  function savePrefs(){try{localStorage.setItem('shortlist-v3-prefs',JSON.stringify(prefs));}catch(e){}}
+  function savePrefs(){try{localStorage.setItem(PREFKEY[TAB],JSON.stringify(prefs));}catch(e){}}
 
   // Stars carry a priority: 3 = must see, 2 = good option, 1 = backup.
   // When the hosted copy sets window.SHARED_DB (a Firebase Realtime Database URL), stars live there as
@@ -314,15 +346,16 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   AREAS.forEach(function(a){var l=document.createElement('label');l.className='chip';l.innerHTML='<input type="checkbox" id="area-'+a[0]+'" value="'+a[0]+'" checked>'+esc(a[1]);areaBox.appendChild(l);});
 
   function restore(){
-    if(prefs.who)$('who').value=prefs.who; if(prefs.cap)$('cap').value=prefs.cap; if(prefs.sort)$('sort').value=prefs.sort; if(prefs.view)$('view').value=prefs.view;
-    if(prefs.bhk!=null){bhk=prefs.bhk;}
-    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier'].forEach(function(id){if(prefs[id]!=null)$(id).checked=prefs[id];});
-    if(prefs.areas)AREAS.forEach(function(a){$('area-'+a[0]).checked=prefs.areas.indexOf(a[0])>=0;});
+    $('cap').max=TAB==='stay'?36000:32000;
+    $('who').value=prefs.who; $('cap').value=Math.min(prefs.cap,+$('cap').max); $('sort').value=prefs.sort; $('view').value=prefs.view;
+    bhk=prefs.bhk||0;
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier','onlyFull'].forEach(function(id){$(id).checked=!!prefs[id];});
+    AREAS.forEach(function(a){$('area-'+a[0]).checked=!prefs.areas||prefs.areas.indexOf(a[0])>=0;});
     document.querySelectorAll('#bhk button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===bhk));});
   }
   function readPrefs(){
     prefs={who:$('who').value,cap:+$('cap').value,sort:$('sort').value,view:$('view').value,bhk:bhk,areas:AREAS.filter(function(a){return $('area-'+a[0]).checked;}).map(function(a){return a[0];})};
-    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier'].forEach(function(id){prefs[id]=$(id).checked;});
+    ['noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier','onlyFull'].forEach(function(id){prefs[id]=$(id).checked;});
     savePrefs();
   }
 
@@ -338,6 +371,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     if(p.noBusy&&x.flags.some(function(f){return /busy road|main road/.test(f);}))return false;
     if(p.noAgent&&x.postedBy==='Agent')return false;
     if(p.noPremier&&x.premier)return false;
+    if(TAB==='stay'&&p.onlyFull&&x.furn!=='F')return false;
     return true;
   }
   function sorter(s,view){
@@ -347,9 +381,9 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     if(s==='sqft')return function(a,b){return (b.sqft||0)-(a.sqft||0);};
     if(s==='metro')return function(a,b){return (a.metroKm==null?9:a.metroKm)-(b.metroKm==null?9:b.metroKm);};
     if(s==='new')return function(a,b){return (a.days==null?999:a.days)-(b.days==null?999:b.days);};
-    return function(a,b){return (b.score||0)-(a.score||0);};
+    return function(a,b){return ((b.score||0)-(a.score||0))||(a.allin-b.allin);};
   }
-  function flagClass(f){if(/^owner listing|^power backup/.test(f))return 'flag ok';return /busy road|ground floor|over|borewell|deposit (7|8|9|1\d)|scam|stale|contradicts|posted 3|single room|sale text|looks wrong|not stated$/.test(f)&&!/^water not stated$|^deposit not stated$/.test(f)?'flag bad':'flag';}
+  function flagClass(f){if(/^owner listing|^power backup|^fully furnished/.test(f))return 'flag ok';return /busy road|ground floor|over|borewell|deposit (7|8|9|1\d)|scam|stale|contradicts|posted 3|single room|sale text|looks wrong|not stated$/.test(f)&&!/^water not stated$|^deposit not stated$/.test(f)?'flag bad':'flag';}
 
   function starGroup(id){
     var mp=myPri(id);
@@ -361,7 +395,7 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     return '<div class="who">'+ppl.map(function(e){return (SHARED?esc(e.mine?'You':e.n)+' ':'')+'★★★'.slice(0,e.p)+' '+PRI[e.p].toLowerCase();}).join(' · ')+'</div>';
   }
   function card(x,i,rankAll){
-    var sub=x.sub||{}; var parts=[['loc','--s-loc'],['light','--s-light'],['water','--s-water'],['cost','--s-cost'],['qual','--s-qual'],['trust','--s-trust']];
+    var sub=x.sub||{}; var parts=TAB==='stay'?STAY_PARTS:ALL_PARTS;
     var bar=parts.map(function(p){return '<i style="width:'+(sub[p[0]]||0)+'%;background:var('+p[1]+')" title="'+p[0]+' '+(sub[p[0]]||0)+'"></i>';}).join('');
     var fl=x.floor===0?'Ground floor':x.floor==null?'Floor not stated':'Floor '+x.floor+(x.tf?' of '+x.tf:'');
     var facts=[
@@ -406,7 +440,9 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
       $('count').textContent=rows.length+' of '+nb.length+' listings match';
     } else {
       // Shortlists show every starred home, whatever the filters say.
-      rows=all.filter(function(x){return view==='mine'?myPri(x.id)>0:people(x.id).length>0;}).sort(sorter(prefs.sort,view));
+      var seen={}, pool=[];
+      all.concat(TAB==='stay'?DS.all.all:DS.stay.all).forEach(function(x){if(!seen[x.id]){seen[x.id]=1;pool.push(x);}});
+      rows=pool.filter(function(x){return view==='mine'?myPri(x.id)>0:people(x.id).length>0;}).sort(sorter(prefs.sort,view));
       $('count').textContent=rows.length+(view==='mine'?' homes on your shortlist':' homes on anyone\'s shortlist');
     }
     var rankMap={}; nb.slice().sort(function(a,b){return b.score-a.score;}).forEach(function(x,i){rankMap[x.id]=i+1;});
@@ -416,6 +452,16 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     $('more').hidden=rows.length<=shown; $('more').textContent='Show '+Math.min(25,rows.length-shown)+' more';
   }
   function stats(){
+    if(TAB==='stay'){
+      var by2={}; nb.forEach(function(x){by2[x.src]=(by2[x.src]||0)+1;});
+      var s2=[[nb.length,'good furnished homes ranked ('+Object.keys(by2).map(function(k){return by2[k]+' '+k;}).join(', ')+')'],
+        [nb.filter(function(x){return x.furn==='F';}).length,'fully furnished'],
+        [nb.filter(function(x){return x.postedBy==='Owner';}).length,'from owners (no brokerage)'],
+        [nb.filter(function(x){return x.allin<=30000;}).length,'at ₹30k or less all-in'],
+        [nb.filter(function(x){return x.metroKm!=null&&x.metroKm<=1;}).length,'within 1 km of a metro (exact pin)']];
+      $('stats').innerHTML=s2.map(function(a){return '<div class="stat"><b class="num">'+a[0]+'</b><span>'+a[1]+'</span></div>';}).join('');
+      return;
+    }
     var c25=nb.filter(function(x){return x.allin<=25000;}).length;
     var upper=nb.filter(function(x){return x.floor>=1&&x.water;}).length;
     var bach=nb.filter(function(x){return ['ANYONE','BACHELOR','BACHELOR_MALE','BACHELOR_FEMALE'].indexOf(x.tenants)>=0;}).length;
@@ -425,14 +471,13 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
     $('stats').innerHTML=s.map(function(a){return '<div class="stat"><b class="num">'+a[0]+'</b><span>'+a[1]+'</span></div>';}).join('');
   }
   function renderOthers(){
-    if(!other.length)return;
-    $('others-sec').hidden=false;
+    $('others-sec').hidden=!other.length; if(!other.length)return;
     other.sort(function(a,b){return (b.score||0)-(a.score||0);});
     $('others').innerHTML=other.map(function(x,i){return card(x,i,999);}).join('');
   }
 
   $('more').addEventListener('click',function(){shown+=25;render();});
-  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
+  ['who','cap','sort','noGround','noWaterUnknown','noPhotos','noBusy','noAgent','noPremier','onlyFull'].forEach(function(id){$(id).addEventListener(id==='cap'?'input':'change',function(){shown=25;render();});});
   $('view').addEventListener('change',function(){
     var v=$('view').value, s=$('sort');
     if(v!=='all'&&s.value==='score')s.value='prio';
@@ -446,10 +491,36 @@ footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);paddi
   $('myname').addEventListener('input',function(){me=$('myname').value;try{localStorage.setItem('shortlist-name',me);}catch(e){} if(SHARED)render();});
   if(!SHARED)$('myname').closest('.ctl').hidden=true;
 
+  var ALL_PARTS=[['loc','--s-loc'],['light','--s-light'],['water','--s-water'],['cost','--s-cost'],['qual','--s-qual'],['trust','--s-trust']];
+  var STAY_PARTS=[['area','--s-loc'],['light','--s-light'],['furn','--s-cost'],['water','--s-water'],['bldg','--s-qual'],['terms','--s-trust'],['rent','--s-rent']];
+  var CHROME={
+    all:{lead:$('lead').textContent, legend:[['--s-loc','Area + walk 30'],['--s-light','Light + air 25'],['--s-water','Water 15'],['--s-cost','Value 15'],['--s-qual','Building 5'],['--s-trust','Terms + listing 10']], prem:'Premier (₹30–32k)',
+      note:$('others-note').textContent},
+    stay:{lead:'Good semi- and fully furnished 1BHK and 2BHK homes up to ₹36k all-in in and around Indiranagar, including JB Nagar, HAL 3rd Stage, Kodihalli and the Rustam Bagh side. Ranked for a stay of a few months: safe, walkable streets first, then light and air, furnishing, water and the building. Rent counts least; equal scores are ordered cheapest first. Ground-floor and unfurnished homes are left out.',
+      legend:[['--s-loc','Area + walk 35'],['--s-light','Light + air 20'],['--s-cost','Furnishing 15'],['--s-water','Water 10'],['--s-qual','Building 10'],['--s-trust','Terms 5'],['--s-rent','Rent 5']], prem:'Above ₹30k',
+      note:'These furnished listings showed warning signs: fully furnished Indiranagar flats at ₹15k with a ₹30k deposit, posted by several different "owners" for the same buildings. It\'s the same pattern as the scam posts on MagicBricks. Never pay a token or "visit fee" before you\'ve seen the flat and checked the owner\'s property tax receipt.'}};
+  function chrome(){
+    var c=CHROME[TAB];
+    $('lead').textContent=c.lead; $('prem-label').textContent=c.prem; $('others-note').textContent=c.note;
+    $('legend').innerHTML=c.legend.map(function(l){return '<span><i style="background:var('+l[0]+')"></i>'+esc(l[1])+'</span>';}).join('');
+    $('onlyFull-chip').hidden=TAB!=='stay'; $('score-all').hidden=TAB==='stay'; $('score-stay').hidden=TAB!=='stay'; $('foot-stay').hidden=TAB!=='stay';
+    document.querySelectorAll('.tabs button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.tab===TAB));});
+  }
+  function setTab(t){
+    if(t===TAB&&all.length)return;
+    if(all.length)readPrefs();
+    TAB=t; all=DS[t].all; nb=DS[t].nb; other=DS[t].other;
+    loadPrefs(); restore(); chrome(); shown=25; stats(); render(); renderOthers();
+    try{ if(t==='stay'){ if(location.hash!=='#furnished')location.hash='furnished'; } else if(location.hash==='#furnished'){ history.replaceState(null,'',location.pathname+location.search); } }catch(e){}
+  }
+  document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){setTab(b.dataset.tab);});});
+  window.addEventListener('hashchange',function(){if(all.length)setTab(location.hash==='#furnished'?'stay':'all');});
+
   restore();
   fetch('listings.json').then(function(r){return r.json();}).then(function(d){
-    all=d.items; nb=all.filter(function(x){return x.score!=null;}); other=all.filter(function(x){return x.score==null;});
-    stats(); render(); renderOthers();
+    function split(list){return {all:list,nb:list.filter(function(x){return x.score!=null;}),other:list.filter(function(x){return x.score==null;})};}
+    DS.all=split(d.items); DS.stay=split(d.stays||[]);
+    setTab(location.hash==='#furnished'?'stay':'all');
     if(SHARED){pullShared(); setInterval(pullShared,15000); document.addEventListener('visibilitychange',function(){if(!document.hidden)pullShared();});}
   }).catch(function(){ $('list').innerHTML='<div class="empty">The listing data didn\'t load. Reload the page to try again.</div>'; });
 })();
